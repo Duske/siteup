@@ -58,7 +58,7 @@ gulp.task('html', ['styles'], () => {
 
 gulp.task('compile', () => {
   var options = {
-        ignorePartials: true, //ignores the unknown footer2 partial in the handlebars template, defaults to false 
+        ignorePartials: true, //ignores the unknown footer2 partial in the handlebars template, defaults to false
         batch : ['./app/pages/partials']
     };
   return gulp.src('app/pages/*.hbs')
@@ -102,7 +102,7 @@ gulp.task('extras', () => {
 
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
 
-gulp.task('serve', ['styles', 'fonts'], () => {
+gulp.task('serve', ['styles', 'fonts', 'compile'], () => {
   browserSync({
     notify: false,
     port: 9000,
@@ -162,12 +162,12 @@ gulp.task('wiredep', () => {
     }))
     .pipe(gulp.dest('app/styles'));
 
-  gulp.src('app/*.html')
+  gulp.src('app/pages/partials/*.hbs')
     .pipe(wiredep({
       exclude: ['bootstrap-sass'],
       ignorePath: /^(\.\.\/)*\.\./
     }))
-    .pipe(gulp.dest('app'));
+    .pipe(gulp.dest('app/pages/partials/'));
 });
 
 gulp.task('build', ['lint', 'html', 'images', 'fonts', 'extras'], () => {
