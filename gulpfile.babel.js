@@ -123,8 +123,9 @@ gulp.task('serve', ['styles', 'fonts', 'compile'], () => {
 
   gulp.watch('app/styles/**/*.scss', ['styles']);
   gulp.watch('app/pages/**/*.hbs', ['compile']);
-  //gulp.watch('app/fonts/**/*', ['fonts']);
-  //gulp.watch('bower.json', ['wiredep', 'fonts']);
+  gulp.watch('app/scripts/**/*.js', ['lint']);
+  gulp.watch('app/fonts/**/*', ['fonts']);
+  gulp.watch('bower.json', ['wiredep', 'fonts']);
 });
 
 gulp.task('serve:dist', () => {
