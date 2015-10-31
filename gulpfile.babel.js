@@ -3,6 +3,7 @@ import gulp from 'gulp';
 import gulpLoadPlugins from 'gulp-load-plugins';
 import browserSync from 'browser-sync';
 import handlebars from 'gulp-compile-handlebars';
+import es2015ModuleTranspiler from 'gulp-es6-module-transpiler';
 import del from 'del';
 import {stream as wiredep} from 'wiredep';
 
@@ -24,6 +25,26 @@ gulp.task('styles', () => {
     .pipe(gulp.dest('.tmp/styles'))
     .pipe(reload({stream: true}));
 });
+
+function es2015fiy(files, options) {
+  return () => {
+    return gulp.src(files)
+      .pipe($.sourcemaps.init())
+      .pipe(es2015ModuleTranspiler({
+        formatter: 'bundle',
+        basePath: 'app/scripts'
+      }))
+      .on('error', $.util.log)
+      .pipe($.concat('app.js'))
+      .pipe($.babel({
+        'blacklist': 'es6.modules'
+      }))
+      .pipe($.sourcemaps.write())
+      .pipe(gulp.dest('.tmp/scripts'))
+  }
+}
+
+gulp.task('es2015fiy', es2015fiy('app/scripts/main.js'));
 
 function lint(files, options) {
   return () => {
@@ -63,7 +84,7 @@ gulp.task('compile', () => {
     };
   return gulp.src('app/pages/*.hbs')
     .pipe(handlebars(siteData, options))
-    .pipe($.rename({extname: ".html"}))
+    .pipe($.rename({extname: '.html'}))
     .pipe(gulp.dest('.tmp'));
 });
 
@@ -102,7 +123,7 @@ gulp.task('extras', () => {
 
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
 
-gulp.task('serve', ['styles', 'fonts', 'compile'], () => {
+gulp.task('serve', ['styles', 'fonts', 'compile', 'lint', 'es2015fiy'], () => {
   browserSync({
     notify: false,
     port: 9000,
@@ -123,7 +144,7 @@ gulp.task('serve', ['styles', 'fonts', 'compile'], () => {
 
   gulp.watch('app/styles/**/*.scss', ['styles']);
   gulp.watch('app/pages/**/*.hbs', ['compile']);
-  gulp.watch('app/scripts/**/*.js', ['lint']);
+  gulp.watch('app/scripts/**/*.js', ['lint', 'es2015fiy']);
   gulp.watch('app/fonts/**/*', ['fonts']);
   gulp.watch('bower.json', ['wiredep', 'fonts']);
 });
@@ -171,7 +192,7 @@ gulp.task('wiredep', () => {
     .pipe(gulp.dest('app/pages/partials/'));
 });
 
-gulp.task('build', ['lint', 'html', 'images', 'fonts', 'extras'], () => {
+gulp.task('build', ['lint', 'es2015fiy', 'html', 'images', 'fonts', 'extras'], () => {
   return gulp.src('dist/**/*').pipe($.size({title: 'build', gzip: true}));
 });
 
