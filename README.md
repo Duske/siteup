@@ -16,4 +16,5 @@ The most common use case in my experience is to generate a working prototype in 
 
 ## TODO
 - [ ] Testing Setup for JS
+- [ ] Testing for Gulpfile config
 - [ ] Restructure existing SASS configuration/directories 
