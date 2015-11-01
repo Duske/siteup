@@ -12,8 +12,8 @@ The most common use case in my experience is to generate a working prototype in 
 * Gulp as build system
 * BrowserSync as a live-server while developing
 * ESLint
+* ES2015 transpilation for written JS, supporting ES2015 modules
 
 ## TODO
-* ES2015 transpilation for written JS
-* Testing Setup for JS
-* Restructure existing SASS configuration/directories 
+- [ ] Testing Setup for JS
+- [ ] Restructure existing SASS configuration/directories 
