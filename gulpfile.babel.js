@@ -11,6 +11,24 @@ const siteData = require('./siteData.json');
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
 
+export function es2015fy(files, options) {
+  return () => {
+    return gulp.src(files)
+      .pipe($.sourcemaps.init())
+      .pipe(es2015ModuleTranspiler({
+        formatter: options.bundle || 'bundle',
+        basePath: options.basePath
+      }))
+      .on('error', $.util.log)
+      .pipe($.concat(options.filename))
+      .pipe($.babel({
+        'blacklist': 'es6.modules'
+      }))
+      .pipe($.sourcemaps.write())
+      .pipe(gulp.dest(options.destDir))
+  }
+}
+
 gulp.task('styles', () => {
   return gulp.src('app/styles/*.scss')
     .pipe($.plumber())
@@ -26,25 +44,11 @@ gulp.task('styles', () => {
     .pipe(reload({stream: true}));
 });
 
-function es2015fy(files, options) {
-  return () => {
-    return gulp.src(files)
-      .pipe($.sourcemaps.init())
-      .pipe(es2015ModuleTranspiler({
-        formatter: 'bundle',
-        basePath: 'app/scripts'
-      }))
-      .on('error', $.util.log)
-      .pipe($.concat('app.js'))
-      .pipe($.babel({
-        'blacklist': 'es6.modules'
-      }))
-      .pipe($.sourcemaps.write())
-      .pipe(gulp.dest('.tmp/scripts'))
-  }
-}
-
-gulp.task('es2015fy', es2015fy('app/scripts/main.js'));
+gulp.task('es2015fy', es2015fy('app/scripts/main.js', {
+  basePath: 'app/scripts',
+  filename: 'app.js',
+  destDir: '.tmp/scripts'
+}));
 
 function lint(files, options) {
   return () => {
