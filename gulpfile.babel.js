@@ -26,7 +26,7 @@ gulp.task('styles', () => {
     .pipe(reload({stream: true}));
 });
 
-function es2015fiy(files, options) {
+function es2015fy(files, options) {
   return () => {
     return gulp.src(files)
       .pipe($.sourcemaps.init())
@@ -44,7 +44,7 @@ function es2015fiy(files, options) {
   }
 }
 
-gulp.task('es2015fiy', es2015fiy('app/scripts/main.js'));
+gulp.task('es2015fy', es2015fy('app/scripts/main.js'));
 
 function lint(files, options) {
   return () => {
@@ -123,7 +123,7 @@ gulp.task('extras', () => {
 
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
 
-gulp.task('serve', ['styles', 'fonts', 'compile', 'lint', 'es2015fiy'], () => {
+gulp.task('serve', ['styles', 'fonts', 'compile', 'lint', 'es2015fy'], () => {
   browserSync({
     notify: false,
     port: 9000,
@@ -144,7 +144,7 @@ gulp.task('serve', ['styles', 'fonts', 'compile', 'lint', 'es2015fiy'], () => {
 
   gulp.watch('app/styles/**/*.scss', ['styles']);
   gulp.watch('app/pages/**/*.hbs', ['compile']);
-  gulp.watch('app/scripts/**/*.js', ['lint', 'es2015fiy']);
+  gulp.watch('app/scripts/**/*.js', ['lint', 'es2015fy']);
   gulp.watch('app/fonts/**/*', ['fonts']);
   gulp.watch('bower.json', ['wiredep', 'fonts']);
 });
@@ -192,7 +192,7 @@ gulp.task('wiredep', () => {
     .pipe(gulp.dest('app/pages/partials/'));
 });
 
-gulp.task('build', ['lint', 'es2015fiy', 'html', 'images', 'fonts', 'extras'], () => {
+gulp.task('build', ['lint', 'es2015fy', 'html', 'images', 'fonts', 'extras'], () => {
   return gulp.src('dist/**/*').pipe($.size({title: 'build', gzip: true}));
 });
 
