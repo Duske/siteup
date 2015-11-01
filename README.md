@@ -1,4 +1,4 @@
-# siteup
+# siteup [![Build Status](https://travis-ci.org/Duske/siteup.svg)](https://travis-ci.org/Duske/siteup)
 
 ## What is siteup?
 An opinionated and simple site-generator. It helps you to quickly kick-off a page or template.
