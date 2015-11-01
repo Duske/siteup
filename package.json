@@ -32,17 +32,5 @@
     "mocha": "^2.3.3",
     "opn": "^1.0.1",
     "wiredep": "^2.2.2"
-  },
-  "eslintConfig": {
-    "env": {
-      "node": true,
-      "browser": true
-    },
-    "rules": {
-      "quotes": [
-        2,
-        "single"
-      ]
-    }
   }
 }
