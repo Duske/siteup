@@ -87,4 +87,45 @@ describe('Test gulp tasks', function() {
     });
   });
 
+  describe('HTML compilation (Handlebars)', function() {
+    this.timeout(5000);
+    const testConstant = 'testConstant';
+    gulp.task('compileHandlebars', gulpfile.compileHandlebars(inputDir + '/index.hbs', {
+      handlebars: {
+        options: {
+          batch : [inputDir + '/partials'],
+          ignorePartials: true
+        },
+        data: {
+          testConstant: 'testConstant'
+        },
+      },
+      fileExtension: '.html',
+      destDir: outputDir
+    }));
+    it('should compile handlebars file into html', function(done) {
+      gulp.task('test', ['compileHandlebars'], () => {
+        expect(fs.existsSync(outputDir + '/index.html')).to.be(true);
+        done();
+      });
+      gulp.start('test');
+    });
+    it('should compile handlebars partials', function(done) {
+      gulp.task('test', ['compileHandlebars'], () => {
+        expect(fs.readFileSync(outputDir + '/index.html').toString('utf8'))
+          .to.contain('Partial time!');
+        done();
+      });
+      gulp.start('test');
+    });
+    it('should compile additional JSON Data into templates', function(done) {
+      gulp.task('test', ['compileHandlebars'], () => {
+        expect(fs.readFileSync(outputDir + '/index.html').toString('utf8'))
+          .to.contain(testConstant);
+        done();
+      });
+      gulp.start('test');
+    });
+  });
+
 });

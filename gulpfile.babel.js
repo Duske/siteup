@@ -6,7 +6,7 @@ import es2015ModuleTranspiler from 'gulp-es6-module-transpiler';
 import del from 'del';
 import {stream as wiredep} from 'wiredep';
 
-const siteData = require('./siteData.json');
+const SITEDATA = require('./siteData.json');
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
 
@@ -44,6 +44,27 @@ export function compileStyles(files, options) {
       .pipe(reload({stream: true}));
     }
 }
+
+export function compileHandlebars(files, options) {
+  return () => {
+    return gulp.src(files)
+      .pipe(handlebars(options.handlebars.data || {}, options.handlebars.options))
+      .pipe($.rename({extname: options.fileExtension}))
+      .pipe(gulp.dest(options.destDir));
+  }
+}
+gulp.task('compileHandlebars', compileHandlebars('app/pages/*.hbs', {
+  handlebars: {
+    options: {
+      batch : ['./app/pages/partials'],
+      ignorePartials: true //ignores the unknown footer2 partial in the handlebars template, defaults to false
+    },
+    data: SITEDATA,
+  },
+  fileExtension: '.html',
+  destDir: '.tmp'
+}));
+
 
 gulp.task('styles', compileStyles('app/styles/*.scss', {
   destDir: '.tmp/styles',
@@ -87,17 +108,6 @@ gulp.task('html', ['styles'], () => {
     .pipe(gulp.dest('dist'));
 });
 
-gulp.task('compile', () => {
-  var options = {
-        ignorePartials: true, //ignores the unknown footer2 partial in the handlebars template, defaults to false
-        batch : ['./app/pages/partials']
-    };
-  return gulp.src('app/pages/*.hbs')
-    .pipe(handlebars(siteData, options))
-    .pipe($.rename({extname: '.html'}))
-    .pipe(gulp.dest('.tmp'));
-});
-
 gulp.task('images', () => {
   return gulp.src('app/images/**/*')
     .pipe($.if($.if.isFile, $.cache($.imagemin({
@@ -133,7 +143,7 @@ gulp.task('extras', () => {
 
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
 
-gulp.task('serve', ['styles', 'fonts', 'compile', 'lint', 'es2015fy'], () => {
+gulp.task('serve', ['styles', 'fonts', 'compileHandlebars', 'lint', 'es2015fy'], () => {
   browserSync({
     notify: false,
     port: 9000,
@@ -153,7 +163,7 @@ gulp.task('serve', ['styles', 'fonts', 'compile', 'lint', 'es2015fy'], () => {
   ]).on('change', reload);
 
   gulp.watch('app/styles/**/*.scss', ['styles']);
-  gulp.watch('app/pages/**/*.hbs', ['compile']);
+  gulp.watch('app/pages/**/*.hbs', ['compileHandlebars']);
   gulp.watch('app/scripts/**/*.js', ['lint', 'es2015fy']);
   gulp.watch('app/fonts/**/*', ['fonts']);
   gulp.watch('bower.json', ['wiredep', 'fonts']);
