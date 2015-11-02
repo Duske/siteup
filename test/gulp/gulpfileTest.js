@@ -85,6 +85,14 @@ describe('Test gulp tasks', function() {
       });
       gulp.start('test');
     });
+    it('should add vendor prefixes via autoprefixer, e.g. "hyphens: none"', function(done) {
+      gulp.task('test', ['compileStyles'], () => {
+        expect(fs.readFileSync(outputDir + '/main.css').toString('utf8'))
+          .to.contain('-ms-');
+        done();
+      });
+      gulp.start('test');
+    });
   });
 
   describe('HTML compilation (Handlebars)', function() {
