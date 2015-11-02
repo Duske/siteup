@@ -13,8 +13,8 @@ The most common use case in my experience is to generate a working prototype in 
 * BrowserSync as a live-server while developing
 * ESLint
 * ES2015 transpilation for written JS, supporting ES2015 modules
+* Test cases for gulpfile configuration/tasks
 
 ## TODO
 - [ ] Testing Setup for JS
-- [ ] Testing for Gulpfile config
 - [ ] Restructure existing SASS configuration/directories 
