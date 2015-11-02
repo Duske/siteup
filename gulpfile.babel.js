@@ -1,4 +1,3 @@
-// generated on 2015-09-12 using generator-gulp-webapp 1.0.3
 import gulp from 'gulp';
 import gulpLoadPlugins from 'gulp-load-plugins';
 import browserSync from 'browser-sync';
@@ -7,44 +6,76 @@ import es2015ModuleTranspiler from 'gulp-es6-module-transpiler';
 import del from 'del';
 import {stream as wiredep} from 'wiredep';
 
-const siteData = require('./siteData.json');
+const SITEDATA = require('./siteData.json');
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
 
-gulp.task('styles', () => {
-  return gulp.src('app/styles/*.scss')
-    .pipe($.plumber())
-    .pipe($.sourcemaps.init())
-    .pipe($.sass.sync({
-      outputStyle: 'expanded',
-      precision: 10,
-      includePaths: ['.']
-    }).on('error', $.sass.logError))
-    .pipe($.autoprefixer({browsers: ['last 1 version']}))
-    .pipe($.sourcemaps.write())
-    .pipe(gulp.dest('.tmp/styles'))
-    .pipe(reload({stream: true}));
-});
-
-function es2015fiy(files, options) {
+export function es2015fy(files, options) {
   return () => {
     return gulp.src(files)
       .pipe($.sourcemaps.init())
       .pipe(es2015ModuleTranspiler({
-        formatter: 'bundle',
-        basePath: 'app/scripts'
+        formatter: options.bundle || 'bundle',
+        basePath: options.basePath
       }))
       .on('error', $.util.log)
-      .pipe($.concat('app.js'))
+      .pipe($.concat(options.filename))
       .pipe($.babel({
         'blacklist': 'es6.modules'
       }))
       .pipe($.sourcemaps.write())
-      .pipe(gulp.dest('.tmp/scripts'))
+      .pipe(gulp.dest(options.destDir))
   }
 }
 
-gulp.task('es2015fiy', es2015fiy('app/scripts/main.js'));
+export function compileStyles(files, options) {
+  return () => {
+    return gulp.src(files)
+      .pipe($.plumber())
+      .pipe($.sourcemaps.init())
+      .pipe($.sass.sync({
+        outputStyle: 'expanded',
+        precision: 10,
+        includePaths: ['.']
+      }).on('error', $.sass.logError))
+      .pipe($.autoprefixer({browsers: options.supportedBrowsers}))
+      .pipe($.sourcemaps.write())
+      .pipe(gulp.dest(options.destDir))
+      .pipe(reload({stream: true}));
+    }
+}
+
+export function compileHandlebars(files, options) {
+  return () => {
+    return gulp.src(files)
+      .pipe(handlebars(options.handlebars.data || {}, options.handlebars.options))
+      .pipe($.rename({extname: options.fileExtension}))
+      .pipe(gulp.dest(options.destDir));
+  }
+}
+gulp.task('compileHandlebars', compileHandlebars('app/pages/*.hbs', {
+  handlebars: {
+    options: {
+      batch : ['./app/pages/partials'],
+      ignorePartials: true //ignores the unknown footer2 partial in the handlebars template, defaults to false
+    },
+    data: SITEDATA,
+  },
+  fileExtension: '.html',
+  destDir: '.tmp'
+}));
+
+
+gulp.task('styles', compileStyles('app/styles/*.scss', {
+  destDir: '.tmp/styles',
+  supportedBrowsers: ['last 1 version']
+}));
+
+gulp.task('es2015fy', es2015fy('app/scripts/main.js', {
+  basePath: 'app/scripts',
+  filename: 'app.js',
+  destDir: '.tmp/scripts'
+}));
 
 function lint(files, options) {
   return () => {
@@ -75,17 +106,6 @@ gulp.task('html', ['styles'], () => {
     .pipe($.useref())
     .pipe($.if('*.html', $.minifyHtml({conditionals: true, loose: true})))
     .pipe(gulp.dest('dist'));
-});
-
-gulp.task('compile', () => {
-  var options = {
-        ignorePartials: true, //ignores the unknown footer2 partial in the handlebars template, defaults to false
-        batch : ['./app/pages/partials']
-    };
-  return gulp.src('app/pages/*.hbs')
-    .pipe(handlebars(siteData, options))
-    .pipe($.rename({extname: '.html'}))
-    .pipe(gulp.dest('.tmp'));
 });
 
 gulp.task('images', () => {
@@ -123,7 +143,7 @@ gulp.task('extras', () => {
 
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
 
-gulp.task('serve', ['styles', 'fonts', 'compile', 'lint', 'es2015fiy'], () => {
+gulp.task('serve', ['styles', 'fonts', 'compileHandlebars', 'lint', 'es2015fy'], () => {
   browserSync({
     notify: false,
     port: 9000,
@@ -143,8 +163,8 @@ gulp.task('serve', ['styles', 'fonts', 'compile', 'lint', 'es2015fiy'], () => {
   ]).on('change', reload);
 
   gulp.watch('app/styles/**/*.scss', ['styles']);
-  gulp.watch('app/pages/**/*.hbs', ['compile']);
-  gulp.watch('app/scripts/**/*.js', ['lint', 'es2015fiy']);
+  gulp.watch('app/pages/**/*.hbs', ['compileHandlebars']);
+  gulp.watch('app/scripts/**/*.js', ['lint', 'es2015fy']);
   gulp.watch('app/fonts/**/*', ['fonts']);
   gulp.watch('bower.json', ['wiredep', 'fonts']);
 });
@@ -192,7 +212,7 @@ gulp.task('wiredep', () => {
     .pipe(gulp.dest('app/pages/partials/'));
 });
 
-gulp.task('build', ['lint', 'es2015fiy', 'html', 'images', 'fonts', 'extras'], () => {
+gulp.task('build', ['lint', 'es2015fy', 'html', 'images', 'fonts', 'extras'], () => {
   return gulp.src('dist/**/*').pipe($.size({title: 'build', gzip: true}));
 });
 
