@@ -13,6 +13,7 @@ describe('Test gulp tasks', function() {
   beforeEach(function(done) {
       del(outputDir, done);
   });
+
   describe('ES2015fy', function() {
     it('should compile ES2015 modules and run babel', function(done) {
       this.timeout(3000);
@@ -35,7 +36,38 @@ describe('Test gulp tasks', function() {
         done();
       });
       gulp.start('test');
-      });
-
     });
+  });
+
+  describe('Style compilation', function() {
+    this.timeout(5000);
+    gulp.task('compileStyles', gulpfile.compileStyles(inputDir + '/main.scss', {
+      destDir: outputDir,
+      supportedBrowsers: ['last 1 version']
+    }));
+    it('should compile SASS into a single css file', function(done) {
+      gulp.task('test', ['compileStyles'], () => {
+        expect(fs.existsSync(outputDir + '/main.css')).to.be(true);
+        done();
+      });
+      gulp.start('test');
+    });
+    it('should compile SASS with sourcemaps', function(done) {
+      gulp.task('test', ['compileStyles'], () => {
+        expect(fs.readFileSync(outputDir + '/main.css').toString('utf8'))
+          .to.contain('\n/*# sourceMappingURL');
+        done();
+      });
+      gulp.start('test');
+    });
+    it('should compile SASS includes as well', function(done) {
+      gulp.task('test', ['compileStyles'], () => {
+        expect(fs.readFileSync(outputDir + '/main.css').toString('utf8'))
+          .to.contain('html');
+        done();
+      });
+      gulp.start('test');
+    });
+  });
+
 });

@@ -1,4 +1,3 @@
-// generated on 2015-09-12 using generator-gulp-webapp 1.0.3
 import gulp from 'gulp';
 import gulpLoadPlugins from 'gulp-load-plugins';
 import browserSync from 'browser-sync';
@@ -29,20 +28,27 @@ export function es2015fy(files, options) {
   }
 }
 
-gulp.task('styles', () => {
-  return gulp.src('app/styles/*.scss')
-    .pipe($.plumber())
-    .pipe($.sourcemaps.init())
-    .pipe($.sass.sync({
-      outputStyle: 'expanded',
-      precision: 10,
-      includePaths: ['.']
-    }).on('error', $.sass.logError))
-    .pipe($.autoprefixer({browsers: ['last 1 version']}))
-    .pipe($.sourcemaps.write())
-    .pipe(gulp.dest('.tmp/styles'))
-    .pipe(reload({stream: true}));
-});
+export function compileStyles(files, options) {
+  return () => {
+    return gulp.src(files)
+      .pipe($.plumber())
+      .pipe($.sourcemaps.init())
+      .pipe($.sass.sync({
+        outputStyle: 'expanded',
+        precision: 10,
+        includePaths: ['.']
+      }).on('error', $.sass.logError))
+      .pipe($.autoprefixer({browsers: options.supportedBrowsers}))
+      .pipe($.sourcemaps.write())
+      .pipe(gulp.dest(options.destDir))
+      .pipe(reload({stream: true}));
+    }
+}
+
+gulp.task('styles', compileStyles('app/styles/*.scss', {
+  destDir: '.tmp/styles',
+  supportedBrowsers: ['last 1 version']
+}));
 
 gulp.task('es2015fy', es2015fy('app/scripts/main.js', {
   basePath: 'app/scripts',
