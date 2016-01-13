@@ -1,13 +1,13 @@
-require('mocha');
+/* globals describe, it, beforeEach */
 import * as gulpfile from '../../gulpfile.babel';
-import assert from 'assert';
 import gulp from 'gulp';
 import del from 'del';
 import expect from 'expect.js';
 import fs from 'fs';
+import path from 'path';
 
-const inputDir = __dirname + '/input';
-const outputDir = __dirname + '/output';
+const inputDir = path.join(__dirname, '/input');
+const outputDir = path.join(__dirname, '/output');
 
 describe('Test gulp tasks', function() {
   beforeEach(function(done) {
@@ -41,7 +41,7 @@ describe('Test gulp tasks', function() {
         expect(fs.readFileSync(outputDir + '/app.js').toString('utf8'))
           .to.not.contain('require(');
         expect(fs.readFileSync(outputDir + '/app.js').toString('utf8'))
-          .to.contain('derp$$testConstant');
+          .to.contain('TESTCASECONSTANT');
         done();
       });
       gulp.start('test');
@@ -101,12 +101,12 @@ describe('Test gulp tasks', function() {
     gulp.task('compileHandlebars', gulpfile.compileHandlebars(inputDir + '/index.hbs', {
       handlebars: {
         options: {
-          batch : [inputDir + '/partials'],
+          batch: [inputDir + '/partials'],
           ignorePartials: true
         },
         data: {
           testConstant: 'testConstant'
-        },
+        }
       },
       fileExtension: '.html',
       destDir: outputDir

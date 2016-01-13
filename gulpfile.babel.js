@@ -2,7 +2,6 @@ import gulp from 'gulp';
 import gulpLoadPlugins from 'gulp-load-plugins';
 import browserSync from 'browser-sync';
 import handlebars from 'gulp-compile-handlebars';
-import es2015ModuleTranspiler from 'gulp-es6-module-transpiler';
 import del from 'del';
 import {stream as wiredep} from 'wiredep';
 
@@ -13,19 +12,16 @@ const reload = browserSync.reload;
 export function es2015fy(files, options) {
   return () => {
     return gulp.src(files)
-      .pipe($.sourcemaps.init())
-      .pipe(es2015ModuleTranspiler({
-        formatter: options.bundle || 'bundle',
-        basePath: options.basePath
+      .pipe($.rollup({
+        format: 'iife',
+        sourceMap: true
       }))
       .on('error', $.util.log)
       .pipe($.concat(options.filename))
-      .pipe($.babel({
-        'blacklist': 'es6.modules'
-      }))
+      .pipe($.babel())
       .pipe($.sourcemaps.write())
-      .pipe(gulp.dest(options.destDir))
-  }
+      .pipe(gulp.dest(options.destDir));
+  };
 }
 
 export function compileStyles(files, options) {
@@ -42,7 +38,7 @@ export function compileStyles(files, options) {
       .pipe($.sourcemaps.write())
       .pipe(gulp.dest(options.destDir))
       .pipe(reload({stream: true}));
-    }
+    };
 }
 
 export function compileHandlebars(files, options) {
@@ -51,15 +47,15 @@ export function compileHandlebars(files, options) {
       .pipe(handlebars(options.handlebars.data || {}, options.handlebars.options))
       .pipe($.rename({extname: options.fileExtension}))
       .pipe(gulp.dest(options.destDir));
-  }
+  };
 }
 gulp.task('compileHandlebars', compileHandlebars('app/pages/*.hbs', {
   handlebars: {
     options: {
-      batch : ['./app/pages/partials'],
+      batch: ['./app/pages/partials'],
       ignorePartials: true //ignores the unknown footer2 partial in the handlebars template, defaults to false
     },
-    data: SITEDATA,
+    data: SITEDATA
   },
   fileExtension: '.html',
   destDir: '.tmp'

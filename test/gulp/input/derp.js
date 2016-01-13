@@ -1,1 +1,1 @@
-export const testConstant = 'TESTCASE';
+export const testConstant = 'TESTCASECONSTANT';

@@ -1,4 +1,2 @@
-import { testConstant } from 'derp';
-() => {
-  console.log(testConstant);
-}
+import { testConstant } from './derp';
+console.log(testConstant);
