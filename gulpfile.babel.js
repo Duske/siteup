@@ -2,23 +2,37 @@ import gulp from 'gulp';
 import gulpLoadPlugins from 'gulp-load-plugins';
 import browserSync from 'browser-sync';
 import handlebars from 'gulp-compile-handlebars';
+import includePaths from 'rollup-plugin-includepaths';
+import babel from 'rollup-plugin-babel';
 import del from 'del';
 import {stream as wiredep} from 'wiredep';
 
 const SITEDATA = require('./siteData.json');
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
+const includePathOptions = {
+    include: {},
+    paths: ['app/scripts'],
+    external: [],
+    extensions: ['.js', '.json', '.html']
+};
 
 export function es2015fy(files, options) {
   return () => {
     return gulp.src(files)
       .pipe($.rollup({
         format: 'iife',
-        sourceMap: true
+        sourceMap: true,
+        plugins: [
+          babel({
+            presets: ['es2015-rollup'],
+            babelrc: false
+          }),
+          includePaths(includePathOptions)
+        ]
       }))
       .on('error', $.util.log)
       .pipe($.concat(options.filename))
-      .pipe($.babel())
       .pipe($.sourcemaps.write())
       .pipe(gulp.dest(options.destDir));
   };

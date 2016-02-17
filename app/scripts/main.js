@@ -1,4 +1,4 @@
-import { dateClicker } from './derp';
+import { dateClicker } from 'derp';
 
 (function(document) {
   console.log('\'Allo \'Allo!!!', document.title);
