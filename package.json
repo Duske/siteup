@@ -38,6 +38,7 @@
     "main-bower-files": "^2.5.0",
     "mocha": "^2.3.4",
     "opn": "^1.0.1",
+    "rollup-plugin-includepaths": "^0.1.0",
     "wiredep": "^2.2.2"
   }
 }
