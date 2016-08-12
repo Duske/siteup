@@ -2,38 +2,39 @@ import gulp from 'gulp';
 import gulpLoadPlugins from 'gulp-load-plugins';
 import browserSync from 'browser-sync';
 import handlebars from 'gulp-compile-handlebars';
-import includePaths from 'rollup-plugin-includepaths';
+//import babelrc from 'babelrc-rollup';
 import babel from 'rollup-plugin-babel';
 import del from 'del';
+import rollup from 'rollup-stream';
+//import rename from 'gulp-rename';
+import source from 'vinyl-source-stream';
+import buffer from 'vinyl-buffer';
 import {stream as wiredep} from 'wiredep';
 
 const SITEDATA = require('./siteData.json');
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
-const includePathOptions = {
-    include: {},
-    paths: ['app/scripts'],
-    external: [],
-    extensions: ['.js', '.json', '.html']
-};
 
-export function es2015fy(files, options) {
+export function es2015fy(entryFile, options) {
   return () => {
-    return gulp.src(files)
-      .pipe($.rollup({
-        format: 'iife',
-        sourceMap: true,
-        plugins: [
-          babel({
-            presets: ['es2015-rollup'],
-            babelrc: false
-          }),
-          includePaths(includePathOptions)
-        ]
-      }))
-      .on('error', $.util.log)
-      .pipe($.concat(options.filename))
-      .pipe($.sourcemaps.write())
+    return rollup({
+      entry: entryFile,
+      format: 'iife',
+      sourceMap: true,
+      plugins: [
+        babel({
+          presets: [
+            ['es2015', { 'modules': false }]
+          ],
+          babelrc: false
+        })
+      ]
+    }).on('error', $.util.log)
+      .pipe(source('main.js', './src'))
+      .pipe(buffer())
+      .pipe($.sourcemaps.init({loadMaps: true}))
+      .pipe($.rename(options.filename))
+      .pipe($.sourcemaps.write('.'))
       .pipe(gulp.dest(options.destDir));
   };
 }
