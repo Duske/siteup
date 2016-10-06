@@ -2,11 +2,9 @@ import gulp from 'gulp';
 import gulpLoadPlugins from 'gulp-load-plugins';
 import browserSync from 'browser-sync';
 import handlebars from 'gulp-compile-handlebars';
-//import babelrc from 'babelrc-rollup';
 import babel from 'rollup-plugin-babel';
 import del from 'del';
 import rollup from 'rollup-stream';
-//import rename from 'gulp-rename';
 import source from 'vinyl-source-stream';
 import buffer from 'vinyl-buffer';
 import {stream as wiredep} from 'wiredep';
@@ -108,11 +106,10 @@ gulp.task('lint:test', lint('test/spec/**/*.js', testLintOptions));
 
 gulp.task('html', ['styles'], () => {
   const assets = $.useref.assets({searchPath: ['.tmp', 'app', '.']});
-
   return gulp.src('.tmp/*.html')
     .pipe(assets)
-    .pipe($.if('*.js', $.uglify()))
-    .pipe($.if('*.css', $.minifyCss({compatibility: '*'})))
+    .pipe($.if('/\.js$/', $.uglify()))
+    .pipe($.if('/\.css$/b', $.cleanCss({compatibility: '*'})))
     .pipe(assets.restore())
     .pipe($.useref())
     .pipe($.if('*.html', $.minifyHtml({conditionals: true, loose: true})))
