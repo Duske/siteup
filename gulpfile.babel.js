@@ -14,7 +14,7 @@ const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
 
 export function es2015fy(entryFile, options) {
-  return () => {
+  return (done) => {
     return rollup({
       entry: entryFile,
       format: 'iife',
@@ -27,8 +27,8 @@ export function es2015fy(entryFile, options) {
           babelrc: false
         })
       ]
-    }).on('error', $.util.log)
-      .pipe(source('main.js', './src'))
+    }).on('error', done)
+      .pipe(source(entryFile))
       .pipe(buffer())
       .pipe($.sourcemaps.init({loadMaps: true}))
       .pipe($.rename(options.filename))
